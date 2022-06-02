@@ -1,0 +1,156 @@
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model ArmyTechTask.Service.ViewModels.InvoiceViewModdel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>InvoiceHeader</h4>
+<hr/>
+<div class="row">
+    <div>
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id"/>
+            <div class="form-row ">
+                <div class="form-group col-md-6">
+                    <label asp-for="CustomerName" class="control-label"></label>
+                    <input asp-for="CustomerName" class="form-control"/>
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label asp-for="Invoicedate" class="control-label"></label>
+                    <input asp-for="Invoicedate" class="form-control"/>
+                    <span asp-validation-for="Invoicedate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label asp-for="CashierId" class="control-label">Cashier</label>
+                    <select asp-for="CashierId" class="form-control" asp-items="ViewBag.CashierId"></select>
+                    <span asp-validation-for="CashierId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="BranchId" class="control-label">Branch</label>
+                    <select asp-for="BranchId" class="form-control" asp-items="ViewBag.BranchId"></select>
+                    <span asp-validation-for="BranchId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row border-bottom border-5 mb-3"></div>
+            @{
+                int i = 0;
+            }
+            @foreach (var InvoiceDetails in Model.InvoiceDetails)
+            {
+                <div class="form-row">
+                    <input id="Id_@i" hidden="" asp-for="@InvoiceDetails.Id" class="form-control"/>
+
+                    <div class="form-group col-md-6">
+                        <label asp-for="@InvoiceDetails.ItemName" class="control-label"></label>
+                        <input id="ItemName_@i" asp-for="@InvoiceDetails.ItemName" class="form-control"/>
+                        <span asp-validation-for="@InvoiceDetails.ItemName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label asp-for="@InvoiceDetails.ItemCount" class="control-label"></label>
+                        <input id="ItemCount_@i" asp-for="@InvoiceDetails.ItemCount" class="form-control"/>
+                        <span asp-validation-for="@InvoiceDetails.ItemCount" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label asp-for="@InvoiceDetails.ItemPrice" class="control-label"></label>
+                        <input id="ItemPrice_@i" asp-for="@InvoiceDetails.ItemPrice" class="form-control"/>
+                        <span asp-validation-for="@InvoiceDetails.ItemPrice" class="text-danger"></span>
+                    </div>
+                </div>
+                <label hidden="">@(i++)</label>
+            }
+            <div class="form-group">
+                <input type="submit" id="btnSave" value="Save" class="btn btn-primary"/>
+            </div>
+        </form>
+
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<script>
+                 var  btnSave = document.getElementById("btnSave");
+                 btnSave.addEventListener("click",submitForm);
+                function submitForm(e){
+                    e.preventDefault();
+                    var Items = [];
+                   
+                    for (var i = 0; i < @Model.InvoiceDetails.Count; i++) {
+                        var itemId = document.getElementById("Id_" + i);
+                        var itemName = document.getElementById("ItemName_"+i);
+                        var itemCount = document.getElementById("ItemCount_"+i);
+                        var itemPrice = document.getElementById("ItemPrice_"+i);
+                        if(itemName.value == "" || itemCount.value == "" || itemPrice.value == ""){
+                            alert("Please fill all the fields");
+                            return;
+                        }
+                         var item = {
+                                                 ItemName: itemName.value,
+                                                    ItemCount: itemCount.value,
+                                                    ItemPrice: itemPrice.value,
+                                                    Id: itemId.value
+                                                };
+
+                                        Items.push(item);
+
+                                       
+
+
+                    }
+                    var data = 
+                    {
+                        Id: @Model.Id,
+                        CustomerName: document.getElementById("CustomerName").value,
+                        BranchId: document.getElementById("BranchId").value,
+                        Invoicedate: document.getElementById("Invoicedate").value,
+                        CashierId: document.getElementById("CashierId").value,
+                        InvoiceDetails: Items
+                    }
+               
+                    //Send the JSON array to Controller using AJAX.
+                    //             $.ajax({
+                    //                 type: "POST",
+                    //                 url: "/Invoice/Edit/@Model.Id",
+                    //                 data: JSON.stringify({'invoiceHeader':data}),
+                    //                 // contentType: "application/json",
+                    //                 dataType: "json",
+                    //                 success: function (r) {
+                    //                     alert(r + " record(s) inserted.");
+                    //                 }
+                    //             });
+                        things = JSON.stringify(data);
+
+                     $.ajax({
+                            contentType: 'application/json; charset=utf-8',
+                            dataType: 'json',
+                            type: 'POST',
+                            url: '/Invoice/Edit/@Model.Id',
+                            data: things,
+                            success: function () {          
+                               
+                                console.log("success");
+                            },
+                            failure: function (response) {          
+                                console.log(response);
+                            }
+                        });
+                    console.log(data);
+                     window.location.href = "/Invoice";
+                    }
+    </script>
+
+@section Scripts {
+
+
+}
